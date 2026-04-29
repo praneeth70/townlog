@@ -34,22 +34,22 @@ export default function ShopLogin() {
     setLoading(false);
   }
 
-  // STEP 1: Verify the Recovery Key
+  // STEP 1: Verify using ONLY the Recovery Key
   async function handleVerifyKey(e) {
     e.preventDefault();
     setProcessing(true);
     
     const { data: shop, error } = await supabase
       .from("shops")
-      .select("id")
-      .eq("id", recoverShopId)
+      .select("id, shop_name")
       .eq("recovery_key", recoveryKeyInput)
       .single();
 
     if (shop) {
+      setRecoverShopId(shop.id); 
       setRecoveryStep("reset");
     } else {
-      alert("Invalid Shop ID or Recovery Key. Access Denied.");
+      alert("Invalid Recovery Key. Please check the code you saved during registration.");
     }
     setProcessing(false);
   }
@@ -67,7 +67,7 @@ export default function ShopLogin() {
       .eq("role", "owner");
 
     if (!error) {
-      alert("PIN reset successful! Launch the app using your Shop ID.");
+      alert("PIN reset successful! You can now login.");
       setShowRecover(false);
       setRecoveryStep("input");
       setNewPin("");
@@ -113,29 +113,29 @@ export default function ShopLogin() {
             {recoveryStep === "input" ? (
               <>
                 <h3 className="text-xl font-black mb-2 uppercase text-[#ff6b35]">Master Recovery</h3>
-                <p className="text-[10px] text-gray-500 mb-8 uppercase font-bold tracking-widest">Enter details to reset Owner PIN</p>
+                <p className="text-[10px] text-gray-500 mb-8 uppercase font-bold tracking-widest">Enter your TL-Key to regain access</p>
                 <form onSubmit={handleVerifyKey} className="flex flex-col gap-4">
                   <input 
-                    placeholder="Shop ID" 
-                    className="p-5 rounded-2xl bg-[#0f0f13] border border-[#2a2a38] text-xs font-mono outline-none focus:border-[#ff6b35]"
-                    onChange={(e) => setRecoverShopId(e.target.value)}
-                    required 
-                  />
-                  <input 
                     placeholder="Recovery Key (TL-XXXX-XXXX)" 
-                    className="p-5 rounded-2xl bg-[#0f0f13] border border-[#2a2a38] text-sm font-mono outline-none focus:border-[#ff6b35] text-[#ff6b35]"
+                    className="p-5 rounded-2xl bg-[#0f0f13] border border-[#2a2a38] text-sm font-mono outline-none focus:border-[#ff6b35] text-[#ff6b35] text-center"
                     onChange={(e) => setRecoveryKeyInput(e.target.value)}
                     required 
                   />
                   <button disabled={processing} className="p-5 bg-[#ff6b35] rounded-2xl font-black uppercase text-xs">
-                    {processing ? "Verifying..." : "Verify Master Key"}
+                    {processing ? "Searching..." : "Verify Master Key"}
                   </button>
                 </form>
               </>
             ) : (
               <>
-                <h3 className="text-xl font-black mb-2 uppercase text-green-500">Key Verified</h3>
-                <p className="text-[10px] text-gray-500 mb-8 uppercase font-bold tracking-widest">Set your new 4-digit Admin PIN</p>
+                <h3 className="text-xl font-black mb-2 uppercase text-green-500">Shop Located!</h3>
+                <p className="text-[10px] text-gray-500 mb-4 uppercase font-bold tracking-widest">Copy your ID and set a new PIN</p>
+                
+                <div className="mb-6 p-4 bg-[#0f0f13] rounded-2xl border border-green-500/20">
+                  <p className="text-[8px] text-gray-500 uppercase mb-1">Your Shop ID:</p>
+                  <code className="text-[10px] font-mono text-green-500 break-all">{recoverShopId}</code>
+                </div>
+
                 <form onSubmit={handleResetPin} className="flex flex-col gap-4">
                   <input 
                     type="password"
@@ -146,7 +146,7 @@ export default function ShopLogin() {
                     required 
                   />
                   <button disabled={processing} className="p-5 bg-green-500 rounded-2xl font-black uppercase text-xs">
-                    {processing ? "Reset PIN" : "Confirm New PIN"}
+                    {processing ? "Updating..." : "Confirm New PIN"}
                   </button>
                 </form>
               </>
@@ -157,7 +157,7 @@ export default function ShopLogin() {
               onClick={() => { setShowRecover(false); setRecoveryStep("input"); }} 
               className="text-gray-600 text-[10px] font-bold uppercase tracking-widest mt-6 hover:text-white"
             >
-              Cancel
+              Back to Login
             </button>
           </div>
         </div>
