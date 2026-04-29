@@ -6,9 +6,11 @@ const withPWA = withPWAInit({
   aggressiveFrontEndNavCaching: true,
   reloadOnOnline: true,
   swMinify: true,
-  disable: process.env.NODE_ENV === "development", // Plugin stays quiet during dev mode
+  disable: process.env.NODE_ENV === "development",
+  // Add this line to handle the Turbopack clash:
+  turbopack: {}, 
 });
 
 export default withPWA({
-  // If you had any existing config like images or redirects, put them here
+  // Your other config options
 });
